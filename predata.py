@@ -1,5 +1,5 @@
 """
-this code help to prepare the raw data to trainable pickale output.
+these codes help to prepare the raw data to trainable pickale output.
 """
 import pickle
 from datetime import datetime, timedelta
@@ -81,7 +81,9 @@ filename = lambda : 'PER_'+str(PERIOD)+'_SAM_'+str(SAMPLE_LENGTH)\
 with open(filename(), 'wb') as f:
     pickle.dump(outxy, f)
 
-# with open('outxy.pickle', 'rb') as f:
-#     data=pickle.load(f)
-    # print('\n\n')
-    # print(data)
+def loadData():
+    """return [(x,y), ...]
+    """
+    with open(filename(), 'rb') as f:
+        data=pickle.load(f)
+        return data
