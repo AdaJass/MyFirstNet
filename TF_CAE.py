@@ -2,16 +2,25 @@
 import tensorflow as tf  
 from tensorflow.examples.tutorials.mnist import input_data  
 import numpy as np  
-from PIL import Image  
+from PIL import Image 
+import os 
   
 train_epochs = 35  ## int(1e5+1)  
   
 INPUT_HEIGHT = 28  
-INPUT_WIDTH = 28  
+INPUT_WIDTH = 28 
   
 batch_size = 256  
   
 noise_factor = 0.5  ## (0~1)  
+
+# The default path for saving event files is the same folder of this python file.
+tf.app.flags.DEFINE_string('log_dir', 
+    os.path.dirname(os.path.abspath(__file__)) + '/logs',
+    'Directory where event logs are written to.')
+
+# Store all elements in FLAG structure!
+FLAGS = tf.app.flags.FLAGS
   
 ## 原始输入是28×28*3  
 input_x = tf.placeholder(tf.float32, [None, INPUT_HEIGHT * INPUT_WIDTH], name='input_with_noise')  
@@ -20,6 +29,8 @@ input_raw = tf.placeholder(tf.float32, shape=[None, INPUT_HEIGHT * INPUT_WIDTH],
   
 ## 1 conv layer  
 ## 输入28*28*3  
+
+
 ## 经过卷积、激活、池化，输出14*14*64  
 weight_1 = tf.Variable(tf.truncated_normal(shape=[3, 3, 1, 64], stddev=0.1, name = 'weight_1'))  
 bias_1 = tf.Variable(tf.constant(0.0, shape=[64], name='bias_1'))  
@@ -86,7 +97,7 @@ optimizer = tf.train.AdamOptimizer(0.01).minimize(loss)
   
   
 with tf.Session() as sess:  
-  
+    writer = tf.summary.FileWriter(os.path.expanduser(FLAGS.log_dir), sess.graph)
     mnist = input_data.read_data_sets('MNIST_data', one_hot=True)  
     n_samples = int(mnist.train.num_examples)  
     print('train samples: %d' % n_samples)  
@@ -99,7 +110,7 @@ with tf.Session() as sess:
         for batch_index in range(total_batch):  
             batch_x, _ = mnist.train.next_batch(batch_size)  
             noise_x = batch_x + noise_factor * np.random.randn(*batch_x.shape)  
-            noise_x = np.clip(noise_x, 0., 1.)  
+            noise_x = np.clip(noise_x, 0., 1.)  #make the noise limited in [0, 1]
             _, train_loss = sess.run([optimizer, loss], feed_dict={input_x: noise_x, input_raw: batch_x})  
             print('epoch: %04d\tbatch: %04d\ttrain loss: %.9f' % (epoch + 1, batch_index + 1, train_loss))  
   
@@ -125,3 +136,6 @@ with tf.Session() as sess:
             if image_raw.mode != 'L':  
                 image_raw = image_raw.convert('L')  
             image_raw.save('./pred/' + str(i * batch_size + index) + '_raw.png')  
+
+writer.close()
+sess.close()
