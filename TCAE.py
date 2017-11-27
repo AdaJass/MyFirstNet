@@ -1,4 +1,4 @@
- 
+  
 import tensorflow as tf  
 import numpy as np  
 import predata as pdt
@@ -29,7 +29,7 @@ input_y = tf.placeholder(tf.float32, shape=[None, INPUT_HEIGHT, INPUT_WIDTH], na
 ## 经过卷积、激活、池化，输出2*385*90 
 weight_1 = tf.Variable(tf.truncated_normal(shape=[3, 288, 1, 90], stddev=0.1, name = 'weight_1'))  
 bias_1 = tf.Variable(tf.constant(0.0, shape=[90], name='bias_1'))  
-conv1 = tf.nn.conv2d(input=input_matrix, filter=weight_1, strides=[2, 3, 1, 1], padding='SAME')   #i don't know how to set the padding 
+conv1 = tf.nn.conv2d(input=input_matrix, filter=weight_1, strides=[1, 2, 3, 1], padding='SAME')   #i don't know how to set the padding 
 conv1 = tf.nn.bias_add(conv1, bias_1, name='conv_1')  
 acti1 = tf.nn.relu(conv1, name='acti_1')  
 # pool1 = tf.nn.max_pool(value=acti1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME', name='max_pool_1')  
@@ -57,21 +57,21 @@ acti3 = tf.nn.relu(conv3, name='acti_3')
   
 ## 1 deconv layer  
 ## 输入2*326*60 
-## 经过反卷积，输出2*338*75  
-deconv_weight_1 = tf.Variable(tf.truncated_normal(shape=[2, 12, 60, 60], stddev=0.1), name='deconv_weight_1')  
-deconv1 = tf.nn.conv2d_transpose(value=pool3, filter=deconv_weight_1, output_shape=[batch_size, 2, 338, 60], strides=[1, 1, 1, 1], padding='SAME', name='deconv_1')  
+## 经过反卷积，输出2*338*75                          #height width  outchannel inchannel
+deconv_weight_1 = tf.Variable(tf.truncated_normal(shape=[2, 12, 75, 60], stddev=0.1), name='deconv_weight_1')  
+deconv1 = tf.nn.conv2d_transpose(value=pool3, filter=deconv_weight_1, output_shape=[batch_size, 2, 338, 75], strides=[1, 1, 1, 1], padding='SAME', name='deconv_1')  
   
 ## 2 deconv layer  
 ## 输入2*338*75
 ## 经过反卷积，输出2*385*90 
-deconv_weight_2 = tf.Variable(tf.truncated_normal(shape=[2, 48, 60, 75], stddev=0.1), name='deconv_weight_2')  
-deconv2 = tf.nn.conv2d_transpose(value=deconv1, filter=deconv_weight_2, output_shape=[batch_size, 14, 14, 64], strides=[1, 1, 1, 1], padding='SAME', name='deconv_2')  
+deconv_weight_2 = tf.Variable(tf.truncated_normal(shape=[2, 48, 90, 75], stddev=0.1), name='deconv_weight_2')  
+deconv2 = tf.nn.conv2d_transpose(value=deconv1, filter=deconv_weight_2, output_shape=[batch_size, 14, 14, 90], strides=[1, 1, 1, 1], padding='SAME', name='deconv_2')  
   
 ## 3 deconv layer  
 ## 输入2*385*90 
 ## 经过反卷积，输出5*1440*90
-deconv_weight_3 = tf.Variable(tf.truncated_normal(shape=[2, 288, 75, 90], stddev=0.1, name='deconv_weight_3'))  
-deconv3 = tf.nn.conv2d_transpose(value=deconv2, filter=deconv_weight_3, output_shape=[batch_size, 5, 1440, 90], strides=[2, 3, 1, 1], padding='SAME', name='deconv_3')  
+deconv_weight_3 = tf.Variable(tf.truncated_normal(shape=[2, 288, 90, 90], stddev=0.1, name='deconv_weight_3'))  
+deconv3 = tf.nn.conv2d_transpose(value=deconv2, filter=deconv_weight_3, output_shape=[batch_size, 5, 1440, 90], strides=[1, 2, 3, 1], padding='SAME', name='deconv_3')  
   
 ## conv layer  
 ## 输入5*1440*90
