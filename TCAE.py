@@ -9,7 +9,7 @@ train_epochs = 20  ## int(1e5+1)
 INPUT_HEIGHT = 5  
 INPUT_WIDTH = 1440
   
-batch_size = 256  
+batch_size = 400  
 
 # The default path for saving event files is the same folder of this python file.
 tf.app.flags.DEFINE_string('log_dir', 
@@ -24,7 +24,7 @@ input_x = tf.placeholder(tf.float32, [None, INPUT_HEIGHT , INPUT_WIDTH], name='i
 input_matrix = tf.reshape(input_x, shape=[-1, INPUT_HEIGHT, INPUT_WIDTH, 1])  
 input_y = tf.placeholder(tf.float32, shape=[None, INPUT_HEIGHT, INPUT_WIDTH], name='input_y')  
   
-## 1 conv layer  
+## 1 conv layer
 ## 输入n*5*1440*1 
 weight_1 = tf.Variable(tf.truncated_normal(shape=[3, 144, 1, 90], stddev=0.1, name = 'weight_1'))  
 bias_1 = tf.Variable(tf.constant(0.0, shape=[90], name='bias_1'))  
@@ -84,12 +84,13 @@ output = tf.reshape(conv_final, shape=[-1, INPUT_HEIGHT, INPUT_WIDTH])
   
 ## loss and optimizer  
 loss = tf.reduce_mean(tf.pow(tf.subtract(output, input_y), 2.0))  
+saver = tf.train.Saver(write_version=tf.train.SaverDef.V1) # 声明tf.train.Saver类用于保存模型
 optimizer = tf.train.AdamOptimizer(0.01).minimize(loss)  
   
   
 with tf.Session() as sess:  
-    writer = tf.summary.FileWriter(os.path.expanduser(FLAGS.log_dir), sess.graph)
-    all_data = pdt.lastdata()
+    # writer = tf.summary.FileWriter(os.path.expanduser(FLAGS.log_dir), sess.graph)
+    all_data = pdt.loadData()
     train_test_pivot = int(len(all_data)*0.8)
     train_data = all_data[0: train_test_pivot]
     test_data = all_data[train_test_pivot:]    
@@ -111,7 +112,9 @@ with tf.Session() as sess:
   
     ## 训练结束后，用测试集测试，并保存加噪图像、去噪图像  
     n_test_samples = len(test_data) 
-    test_total_batch = int(n_test_samples / batch_size)  
+    test_total_batch = int(n_test_samples / batch_size) 
+    saver_path = saver.save(sess, "./model.ckpt")  # 将模型保存到save/model.ckpt文件
+    print("Model saved in file:", saver_path) 
     for i in range(test_total_batch):  
         batch_data = test_data[batch_index*batch_size:(batch_index+1)*batch_size]  #mnist.train.next_batch(batch_size)  
         batch_data = np.array(batch_data)
