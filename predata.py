@@ -59,6 +59,7 @@ def pickleRawData():
         df['c'] = df[2].apply(f_k)
         df['v'] = df[3]
         df['t'] = df[4]
+        
         df['v'].astype('int')
         df['t'].astype('int')
         for i in range(5):
