@@ -9,7 +9,7 @@ train_epochs = 20  ## int(1e5+1)
 INPUT_HEIGHT = 5  
 INPUT_WIDTH = 1440
   
-batch_size = 36
+batch_size = 360
 
 # The default path for saving event files is the same folder of this python file.
 tf.app.flags.DEFINE_string('log_dir', 
@@ -87,9 +87,8 @@ loss = tf.reduce_mean(tf.pow(tf.subtract(output, input_y), 2.0))
 saver = tf.train.Saver(write_version=tf.train.SaverDef.V1) # 声明tf.train.Saver类用于保存模型
 optimizer = tf.train.AdamOptimizer(0.1).minimize(loss)  
   
-  
 with tf.Session() as sess:  
-    writer = tf.summary.FileWriter(os.path.expanduser(FLAGS.log_dir), sess.graph)
+    # writer = tf.summary.FileWriter(os.path.expanduser(FLAGS.log_dir), sess.graph)
     all_data = pdt.loadData()
     train_test_pivot = int(len(all_data)*0.8)
     train_data = all_data[0: train_test_pivot]
@@ -110,7 +109,6 @@ with tf.Session() as sess:
             _, train_loss = sess.run([optimizer, loss], feed_dict={input_x: batch_x, input_y: batch_y})  
             print('epoch: %04d\tbatch: %04d\ttrain loss: %.9f' % (epoch + 1, batch_index + 1, train_loss))  
   
-    ## 训练结束后，用测试集测试，并保存加噪图像、去噪图像  
     n_test_samples = len(test_data) 
     test_total_batch = int(n_test_samples / batch_size) 
     saver_path = saver.save(sess, "./model.ckpt")  # 将模型保存到save/model.ckpt文件
