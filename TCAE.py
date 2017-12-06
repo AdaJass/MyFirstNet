@@ -85,7 +85,12 @@ output = tf.reshape(conv_final, shape=[-1, INPUT_HEIGHT, INPUT_WIDTH])
 ## loss and optimizer  
 loss = tf.reduce_mean(tf.pow(tf.subtract(output, input_y), 2.0))  
 saver = tf.train.Saver(write_version=tf.train.SaverDef.V1) # 声明tf.train.Saver类用于保存模型
-optimizer = tf.train.AdamOptimizer(0.1).minimize(loss)  
+
+current_iter = tf.Variable(0)
+learning_rate = tf.train.exponential_decay(0.01,current_iter,
+                                        decay_steps = train_epochs,
+                                        decay_rate=0.001)
+optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)  
   
 with tf.Session() as sess:  
     writer = tf.summary.FileWriter(os.path.abspath(os.path.expanduser('./logs')), sess.graph)
@@ -100,7 +105,8 @@ with tf.Session() as sess:
     print('total batchs: %d' % total_batch)  
     init = tf.global_variables_initializer()  
     sess.run(init)  
-    for epoch in range(train_epochs):  
+    for epoch in range(train_epochs): 
+        current_iter = epoch 
         for batch_index in range(total_batch):  
             batch_data = train_data[batch_index*batch_size:(batch_index+1)*batch_size]  #mnist.train.next_batch(batch_size)  
             batch_data = np.array(batch_data)
@@ -108,11 +114,12 @@ with tf.Session() as sess:
             batch_y = batch_data[:,1]
             _, train_loss = sess.run([optimizer, loss], feed_dict={input_x: batch_x, input_y: batch_y})  
             print('epoch: %04d\tbatch: %04d\ttrain loss: %.9f' % (epoch + 1, batch_index + 1, train_loss))  
-  
+
+        saver_path = saver.save(sess, "./models/MyFirstNet-Model",global_step=epoch)  # 将模型保存到save/model.ckpt文件
+        print("Model saved in file:", saver_path)
+
     n_test_samples = len(test_data) 
     test_total_batch = int(n_test_samples / batch_size) 
-    saver_path = saver.save(sess, "./model.ckpt")  # 将模型保存到save/model.ckpt文件
-    print("Model saved in file:", saver_path) 
     all_pass_num=0
     for batch_index in range(test_total_batch):  
         batch_data = test_data[batch_index*batch_size:(batch_index+1)*batch_size]  #mnist.train.next_batch(batch_size)  
