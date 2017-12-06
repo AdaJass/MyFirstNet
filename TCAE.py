@@ -9,7 +9,7 @@ train_epochs = 20  ## int(1e5+1)
 INPUT_HEIGHT = 5  
 INPUT_WIDTH = 1440
   
-batch_size = 400  
+batch_size = 36
 
 # The default path for saving event files is the same folder of this python file.
 tf.app.flags.DEFINE_string('log_dir', 
@@ -85,11 +85,11 @@ output = tf.reshape(conv_final, shape=[-1, INPUT_HEIGHT, INPUT_WIDTH])
 ## loss and optimizer  
 loss = tf.reduce_mean(tf.pow(tf.subtract(output, input_y), 2.0))  
 saver = tf.train.Saver(write_version=tf.train.SaverDef.V1) # 声明tf.train.Saver类用于保存模型
-optimizer = tf.train.AdamOptimizer(0.01).minimize(loss)  
+optimizer = tf.train.AdamOptimizer(0.1).minimize(loss)  
   
   
 with tf.Session() as sess:  
-    # writer = tf.summary.FileWriter(os.path.expanduser(FLAGS.log_dir), sess.graph)
+    writer = tf.summary.FileWriter(os.path.expanduser(FLAGS.log_dir), sess.graph)
     all_data = pdt.loadData()
     train_test_pivot = int(len(all_data)*0.8)
     train_data = all_data[0: train_test_pivot]
@@ -115,14 +115,13 @@ with tf.Session() as sess:
     test_total_batch = int(n_test_samples / batch_size) 
     saver_path = saver.save(sess, "./model.ckpt")  # 将模型保存到save/model.ckpt文件
     print("Model saved in file:", saver_path) 
-    for i in range(test_total_batch):  
+    for batch_index in range(test_total_batch):  
         batch_data = test_data[batch_index*batch_size:(batch_index+1)*batch_size]  #mnist.train.next_batch(batch_size)  
         batch_data = np.array(batch_data)
         batch_test_x = batch_data[:,0]
         batch_test_y = batch_data[:,1] 
         test_loss, output_result = sess.run([loss, output], feed_dict={input_x: batch_test_x, input_y: batch_test_y})  
         print('test batch index: %d\ttest loss: %.9f' % (i + 1, test_loss)) 
-
 
         # for index in range(batch_size):  
         #     array = np.reshape(pred_result[index], newshape=[INPUT_HEIGHT, INPUT_WIDTH])  
