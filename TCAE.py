@@ -1,5 +1,6 @@
   
 import tensorflow as tf  
+import util
 import numpy as np  
 import predata as pdt
 import os 
@@ -8,7 +9,6 @@ train_epochs = 20  ## int(1e5+1)
   
 INPUT_HEIGHT = 5  
 INPUT_WIDTH = 1440
-  
 batch_size = 360
 
 # The default path for saving event files is the same folder of this python file.
@@ -88,7 +88,7 @@ saver = tf.train.Saver(write_version=tf.train.SaverDef.V1) # 声明tf.train.Save
 optimizer = tf.train.AdamOptimizer(0.1).minimize(loss)  
   
 with tf.Session() as sess:  
-    # writer = tf.summary.FileWriter(os.path.expanduser(FLAGS.log_dir), sess.graph)
+    writer = tf.summary.FileWriter(os.path.abspath(os.path.expanduser('./logs')), sess.graph)
     all_data = pdt.loadData()
     train_test_pivot = int(len(all_data)*0.8)
     train_data = all_data[0: train_test_pivot]
@@ -113,27 +113,27 @@ with tf.Session() as sess:
     test_total_batch = int(n_test_samples / batch_size) 
     saver_path = saver.save(sess, "./model.ckpt")  # 将模型保存到save/model.ckpt文件
     print("Model saved in file:", saver_path) 
+    all_pass_num=0
     for batch_index in range(test_total_batch):  
         batch_data = test_data[batch_index*batch_size:(batch_index+1)*batch_size]  #mnist.train.next_batch(batch_size)  
         batch_data = np.array(batch_data)
         batch_test_x = batch_data[:,0]
         batch_test_y = batch_data[:,1] 
         test_loss, output_result = sess.run([loss, output], feed_dict={input_x: batch_test_x, input_y: batch_test_y})  
-        print('test batch index: %d\ttest loss: %.9f' % (i + 1, test_loss)) 
-
-        # for index in range(batch_size):  
-        #     array = np.reshape(pred_result[index], newshape=[INPUT_HEIGHT, INPUT_WIDTH])  
-        #     array = array * 255  
-        #     image = Image.fromarray(array)  
-        #     if image.mode != 'L':  
-        #         image = image.convert('L')  
-        #     image.save('./pred/' + str(i * batch_size + index) + '.png')  
-        #     array_raw = np.reshape(noise_test_x[index], newshape=[INPUT_HEIGHT, INPUT_WIDTH])  
-        #     array_raw = array_raw * 255  
-        #     image_raw = Image.fromarray(array_raw)  
-        #     if image_raw.mode != 'L':  
-        #         image_raw = image_raw.convert('L')  
-        #     image_raw.save('./pred/' + str(i * batch_size + index) + '_raw.png')  
+        print('test batch index: %d\ttest loss: %.9f' % (batch_index + 1, test_loss)) 
+        current_pass_num=0
+        for index in range(batch_size):  
+            array = output_result[index]    #5*1440
+            Y=array[2]  #which hope to be the close data
+            assert len(Y) == INPUT_WIDTH
+            _Y = batch_test_y[index][2]
+            Y=Y[-48:]
+            _Y=_Y[-48:]
+            if np.mean(np.fabs(_Y-Y)) and util.sharpRatio(Y) * util.sharpRatio(_Y) >0:
+                all_pass_num+=1
+                current_pass_num+=1
+        print('test batch index: %d\tcurrent pass tests rate: %.9f' % (batch_index + 1, current_pass_num/batch_size))
+        print('test batch index: %d\ttotal pass tests rate: %.9f' % (batch_index + 1, all_pass_num/batch_size*(batch_index+1)))
 
 writer.close()
 sess.close()
