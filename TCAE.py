@@ -136,7 +136,7 @@ with tf.Session() as sess:
             _Y = batch_test_y[index][2]
             Y=Y[-48:]
             _Y=_Y[-48:]
-            if np.mean(np.fabs(_Y-Y)) and util.sharpRatio(Y) * util.sharpRatio(_Y) >0:
+            if np.mean(np.fabs(_Y-Y))<240 and util.sharpRatio(Y) * util.sharpRatio(_Y) >0:
                 all_pass_num+=1
                 current_pass_num+=1
         print('test batch index: %d\tcurrent pass tests rate: %.9f' % (batch_index + 1, current_pass_num/batch_size))
