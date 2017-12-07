@@ -93,7 +93,7 @@ learning_rate = tf.train.exponential_decay(0.01,current_iter,
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)  
   
 with tf.Session() as sess:  
-    writer = tf.summary.FileWriter(os.path.abspath(os.path.expanduser('./logs')), sess.graph)
+    writer = tf.summary.FileWriter(os.path.abspath(os.path.expanduser('./testlogs')), sess.graph)
     all_data = pdt.loadData()
     train_test_pivot = int(len(all_data)*0.8)
     train_data = all_data[0: train_test_pivot]

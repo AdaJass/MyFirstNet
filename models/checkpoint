@@ -1,0 +1,6 @@
+model_checkpoint_path: "MyFirstNet-Model-19"
+all_model_checkpoint_paths: "MyFirstNet-Model-15"
+all_model_checkpoint_paths: "MyFirstNet-Model-16"
+all_model_checkpoint_paths: "MyFirstNet-Model-17"
+all_model_checkpoint_paths: "MyFirstNet-Model-18"
+all_model_checkpoint_paths: "MyFirstNet-Model-19"
