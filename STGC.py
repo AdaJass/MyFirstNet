@@ -1,14 +1,16 @@
   
 import tensorflow as tf  
-  
-train_epochs = 20  ## int(1e5+1)  
-  
+from datetime import datetime
+import math
+import numpy as np
+
+train_epochs = 20 
+PERIOD = 5  # time period is 5 minutes, it will process 5 minite period data.
 INPUT_HEIGHT = 5   
 INPUT_WIDTH = 1440
-batch_size = 360
+GRID_HIGH = 1000    #it means that all price data will in the interval of [0,1000]
+batch_size = 3
 
-FLAGS = tf.app.flags.FLAGS
-  
 ## 原始输入是5*1440*1
 input_x = tf.placeholder(tf.float32, [None, INPUT_HEIGHT , INPUT_WIDTH], name='input_x')  
 input_matrix = tf.reshape(input_x, shape=[-1, INPUT_HEIGHT, INPUT_WIDTH, 1])  
@@ -88,30 +90,50 @@ def PredictNext(currentX):
     saver.restore(sess,model_file)
     output_result = sess.run(output, feed_dict={input_x: currentX})  
     sess.close()
+    return output_result
 
 
 if __name__ == '__main__':
-    with open('./XTIUSD.csv','r') as f:
-        rawdata = f.readlines()
+    # with open('./XTIUSD5.csv','r') as f:
+    #     rawdata = f.readlines()
+    # rawdata = rawdata[-1440:]
 
-    def makeTime(dt):
-        w = dt.weekday()    
-        w_s = w*24*60/PERIOD
-        h = dt.hour
-        h_s = h*60/PERIOD
-        m = dt.minute
-        m_s = math.ceil(m/PERIOD)
-        return int(w_s + h_s + m_s)
-    
-    rawdata = rawdata[-1500:]
-    middata = []
-    for line in tqdm(rawdata):
-        cell = line.split(',')
-        time = cell[0]+' '+cell[1]
-        time = datetime.strptime(time,'%Y.%m.%d %H:%M')
-        highest = float(cell[3])
-        lowest = float(cell[4])
-        close = float(cell[5])
-        volume = int(cell[6])
-        time = makeTime(time)
-        middata.append([highest, lowest, close, volume, time])
+    # def makeTime(dt):
+    #     w = dt.weekday()    
+    #     w_s = w*24*60/PERIOD
+    #     h = dt.hour
+    #     h_s = h*60/PERIOD
+    #     m = dt.minute
+    #     m_s = math.ceil(m/PERIOD)
+    #     return int(w_s + h_s + m_s)    
+    # middata = []
+    # for line in rawdata:
+    #     cell = line.split(',')
+    #     time = cell[0]+' '+cell[1]
+    #     time = datetime.strptime(time,'%Y.%m.%d %H:%M')
+    #     highest = float(cell[3])
+    #     lowest = float(cell[4])
+    #     close = float(cell[5])
+    #     volume = int(cell[6])
+    #     time = makeTime(time)
+    #     middata.append([highest, lowest, close, volume, time])
+    # # print(middata)
+    # middata = np.array(middata)
+    # middata = middata.transpose()
+    # max_v = max(middata[0])
+    # min_v = min(middata[1])
+    # f_k = lambda x: int(math.floor(GRID_HIGH*(x-min_v)/(max_v-min_v)))
+    # for ii in range(3):
+    #     for i,v in enumerate(middata[ii]):
+    #         middata[ii][i] = f_k(v)    
+    # # print(middata.shape)
+    # middata = middata.reshape((1,5,1440))
+    # print(PredictNext(middata))
+    import predata as pt
+    data=pt.loadData()
+    data=data[-batch_size:]
+    data = np.array(data)
+    currentX = data[:,0]
+    # print(currentX)
+    print(PredictNext(currentX))
+

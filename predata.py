@@ -31,6 +31,7 @@ def pickleRawData():
     middata = []  #  [h l close vo time]
     rawdata = f.readlines()
     f.close()
+    # rawdata = rawdata[-2500:]
     print('read and format data:\n')
     for line in tqdm(rawdata):
         cell = line.split(',')
