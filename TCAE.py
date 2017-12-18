@@ -92,7 +92,7 @@ learning_rate = tf.train.exponential_decay(0.01,current_iter,
                                         decay_rate=0.001)
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)  
 
-isTrain = False
+isTrain = True
 
 with tf.Session() as sess: 
     all_data = pdt.loadData()
