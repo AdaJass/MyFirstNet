@@ -66,21 +66,21 @@ deconv2 = tf.nn.conv2d_transpose(value=deconv1, filter=deconv_weight_2, output_s
 ## 3 deconv layer  
 ## 输入3*480*90 
 ## 经过反卷积，输出5*1440*90
-deconv_weight_3 = tf.Variable(tf.truncated_normal(shape=[3, 144, 90, 90], stddev=0.1, name='deconv_weight_3'))  
-deconv3 = tf.nn.conv2d_transpose(value=deconv2, filter=deconv_weight_3, output_shape=[batch_size, 5, 1440, 90], strides=[1, 2, 3, 1], padding='SAME', name='deconv_3')  
+deconv_weight_3 = tf.Variable(tf.truncated_normal(shape=[3, 144, 1, 90], stddev=0.1, name='deconv_weight_3'))  
+deconv3 = tf.nn.conv2d_transpose(value=deconv2, filter=deconv_weight_3, output_shape=[batch_size, 5, 1440, 1], strides=[1, 2, 3, 1], padding='SAME', name='deconv_3')  
   
-## conv layer  
-## 输入5*1440*90
-## 经过卷积，输出为5*1440*1
-weight_final = tf.Variable(tf.truncated_normal(shape=[5, 480, 90, 1], stddev=0.1, name = 'weight_final'))  
-bias_final = tf.Variable(tf.constant(0.0, shape=[1], name='bias_final'))  
-conv_final = tf.nn.conv2d(input=deconv3, filter=weight_final, strides=[1, 1, 1, 1], padding='SAME')  
-conv_final = tf.nn.bias_add(conv_final, bias_final, name='conv_final')  
+# ## conv layer  
+# ## 输入5*1440*90
+# ## 经过卷积，输出为5*1440*1
+# weight_final = tf.Variable(tf.truncated_normal(shape=[5, 480, 90, 1], stddev=0.1, name = 'weight_final'))  
+# bias_final = tf.Variable(tf.constant(0.0, shape=[1], name='bias_final'))  
+# conv_final = tf.nn.conv2d(input=deconv3, filter=weight_final, strides=[1, 1, 1, 1], padding='SAME')  
+# conv_final = tf.nn.bias_add(conv_final, bias_final, name='conv_final')  
   
 ## output  
 ## 输入5*1440*1
 ## reshape为5*1440
-output = tf.reshape(conv_final, shape=[-1, INPUT_HEIGHT, INPUT_WIDTH])  
+output = tf.reshape(deconv3, shape=[-1, INPUT_HEIGHT, INPUT_WIDTH])  
   
 ## loss and optimizer  
 loss = tf.reduce_mean(tf.pow(tf.subtract(output, input_y), 2.0))  
