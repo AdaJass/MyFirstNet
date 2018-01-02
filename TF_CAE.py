@@ -112,6 +112,7 @@ with tf.Session() as sess:
             noise_x = batch_x + noise_factor * np.random.randn(*batch_x.shape)  
             noise_x = np.clip(noise_x, 0., 1.)  #make the noise limited in [0, 1]
             _, train_loss = sess.run([optimizer, loss], feed_dict={input_x: noise_x, input_raw: batch_x})  
+            print(noise_x, '\n', batch_x)
             print('epoch: %04d\tbatch: %04d\ttrain loss: %.9f' % (epoch + 1, batch_index + 1, train_loss))  
   
     ## 训练结束后，用测试集测试，并保存加噪图像、去噪图像  

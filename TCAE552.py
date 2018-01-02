@@ -84,7 +84,7 @@ output = tf.reshape(deconv3, shape=[-1, INPUT_HEIGHT, INPUT_WIDTH])
   
 ## loss and optimizer  
 loss = tf.reduce_mean(tf.pow(tf.subtract(output, input_y), 2.0))  
-saver = tf.train.Saver(write_version=tf.train.SaverDef.V1) # 声明tf.train.Saver类用于保存模型
+saver = tf.train.Saver() # 声明tf.train.Saver类用于保存模型
 
 current_iter = tf.Variable(0)
 learning_rate = tf.train.exponential_decay(0.01,current_iter,
