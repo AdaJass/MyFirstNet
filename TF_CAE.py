@@ -108,9 +108,10 @@ with tf.Session() as sess:
     sess.run(init)  
     for epoch in range(train_epochs):  
         for batch_index in range(total_batch):  
-            batch_x, _ = mnist.train.next_batch(batch_size) 
+            batch_x, _ = mnist.train.next_batch(batch_size)
+            batch_x = batch_x*255 
             print(batch_x,'\n\n') 
-            noise_x = batch_x + noise_factor * np.random.randn(*batch_x.shape)  
+            noise_x = batch_x + 10 * np.random.randn(*batch_x.shape)  
             noise_x = np.clip(noise_x, 0., 1.)  #make the noise limited in [0, 1]
             resulll, train_loss = sess.run([output, loss], feed_dict={input_x: noise_x, input_raw: batch_x})  
             print('epoch: %04d\tbatch: %04d\ttrain loss: %.9f' % (epoch + 1, batch_index + 1, train_loss))  
