@@ -9,7 +9,7 @@ import random
 from tqdm import tqdm
 
 PERIOD = 5  # time period is 5 minutes, it will process 5 minite period data.
-SAMPLE_LENGTH = 1440  # a trainning sample length, 5 days' data
+SAMPLE_LENGTH = 552  # a trainning sample length, 5 days' data
 PREDICT_LENGTH = 48   #predict the next 4 hours data
 GRID_HIGH = 1000    #it means that all price data will in the interval of [0,1000]
 RAW_FILE_NAME = './XTIUSD5.csv'
