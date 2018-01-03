@@ -11,7 +11,7 @@ from tqdm import tqdm
 PERIOD = 5  # time period is 5 minutes, it will process 5 minite period data.
 SAMPLE_LENGTH = 552  # a trainning sample length, 5 days' data
 PREDICT_LENGTH = 48   #predict the next 4 hours data
-GRID_HIGH = 1000    #it means that all price data will in the interval of [0,1000]
+GRID_HIGH = 1440    #it means that all price data will in the interval of [0,14400]
 RAW_FILE_NAME = './XTIUSD5.csv'
 
 filename = lambda : 'PER_'+str(PERIOD)+'_SAM_'+str(SAMPLE_LENGTH)\
@@ -68,6 +68,7 @@ def pickleRawData():
         # print(df)
         matrix = df.as_matrix()
         matrix = matrix.transpose()
+        matrix = matrix/1440
         # print(matrix)
         # exit()
         lastdata.append(matrix)
