@@ -159,7 +159,7 @@ with tf.Session() as sess:
             print('test batch index: %d\ttest loss: %.9f' % (batch_index + 1, test_loss)) 
             current_pass_num=0
             for index in range(batch_size):  
-                array = output_result[index]    #5*1440
+                array = output_result[index]*pre    #5*552
                 Y=array[2]  #which hope to be the close data
                 assert len(Y) == INPUT_WIDTH
                 _Y = batch_test_y[index][2]
