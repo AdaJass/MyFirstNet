@@ -92,83 +92,20 @@ learning_rate = tf.train.exponential_decay(0.01,current_iter,
                                         decay_rate=0.001)
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)  
 
-isTrain = False
+def PredictNext(currentX):
+    sess = tf.Session()
+    model_file=tf.train.latest_checkpoint('./models/')
+    saver.restore(sess,model_file)
+    output_result = sess.run(output, feed_dict={input_x: currentX})  
+    sess.close()
+    return output_result
 
-with tf.Session() as sess: 
-    all_data = pdt.loadData()
-    train_test_pivot = int(len(all_data)*0.8)
-    train_data = all_data[0: train_test_pivot]
-    test_data = all_data[train_test_pivot:]    
-    n_samples = len(train_data) 
-    if isTrain: 
-        writer = tf.summary.FileWriter(os.path.abspath(os.path.expanduser('./testlogs')), sess.graph) 
-        print('train samples: %d' % n_samples)  
-        print('batch size: %d' % batch_size)  
-        total_batch = int(n_samples / batch_size)  
-        print('total batchs: %d' % total_batch)  
-        init = tf.global_variables_initializer()  
-        sess.run(init)  
-        for epoch in range(train_epochs): 
-            current_iter = epoch 
-            for batch_index in range(total_batch):  
-                batch_data = train_data[batch_index*batch_size:(batch_index+1)*batch_size]  #mnist.train.next_batch(batch_size)  
-                batch_data = np.array(batch_data)
-                batch_x = batch_data[:,0]
-                batch_y = batch_data[:,1]
-                _, train_loss = sess.run([optimizer, loss], feed_dict={input_x: batch_x, input_y: batch_y})  
-                print('epoch: %04d\tbatch: %04d\ttrain loss: %.9f' % (epoch + 1, batch_index + 1, train_loss))  
 
-            saver_path = saver.save(sess, "./models/MyFirstNet-Model",global_step=epoch)  # 将模型保存到save/model.ckpt文件
-            print("Model saved in file:", saver_path)
-
-        n_test_samples = len(test_data) 
-        test_total_batch = int(n_test_samples / batch_size) 
-        all_pass_num=0
-        for batch_index in range(test_total_batch):  
-            batch_data = test_data[batch_index*batch_size:(batch_index+1)*batch_size]  #mnist.train.next_batch(batch_size)  
-            batch_data = np.array(batch_data)
-            batch_test_x = batch_data[:,0]
-            batch_test_y = batch_data[:,1] 
-            test_loss, output_result = sess.run([loss, output], feed_dict={input_x: batch_test_x, input_y: batch_test_y})  
-            print('test batch index: %d\ttest loss: %.9f' % (batch_index + 1, test_loss)) 
-            current_pass_num=0
-            for index in range(batch_size):  
-                array = output_result[index]    #5*1440
-                Y=array[2]  #which hope to be the close data
-                assert len(Y) == INPUT_WIDTH
-                _Y = batch_test_y[index][2]
-                Y=Y[-48:]
-                _Y=_Y[-48:]
-                if np.mean(np.fabs(_Y-Y))<240 and util.sharpRatio(Y) * util.sharpRatio(_Y) >0:
-                    all_pass_num+=1
-                    current_pass_num+=1
-            print('test batch index: %d\tcurrent pass tests rate: %.9f' % (batch_index + 1, current_pass_num/batch_size))
-            print('test batch index: %d\ttotal pass tests rate: %.9f' % (batch_index + 1, all_pass_num/batch_size*(batch_index+1)))
-    else:
-        model_file=tf.train.latest_checkpoint('./models/')
-        saver.restore(sess,model_file)
-        n_test_samples = len(test_data) 
-        test_total_batch = int(n_test_samples / batch_size) 
-        all_pass_num=0
-        for batch_index in range(test_total_batch):  
-            batch_data = test_data[batch_index*batch_size:(batch_index+1)*batch_size]  #mnist.train.next_batch(batch_size)  
-            batch_data = np.array(batch_data)
-            batch_test_x = batch_data[:,0]
-            batch_test_y = batch_data[:,1] 
-            test_loss, output_result = sess.run([loss, output], feed_dict={input_x: batch_test_x, input_y: batch_test_y})  
-            print('test batch index: %d\ttest loss: %.9f' % (batch_index + 1, test_loss)) 
-            current_pass_num=0
-            for index in range(batch_size):  
-                array = output_result[index]    #5*1440
-                Y=array[2]  #which hope to be the close data
-                assert len(Y) == INPUT_WIDTH
-                _Y = batch_test_y[index][2]
-                Y=Y[-48:]
-                _Y=_Y[-48:]
-                if np.mean(np.fabs(_Y-Y))<240 and util.sharpRatio(Y) * util.sharpRatio(_Y) >0:
-                    all_pass_num+=1
-                    current_pass_num+=1
-            print('test batch index: %d\tcurrent pass tests rate: %.9f' % (batch_index + 1, current_pass_num/batch_size))
-            print('test batch index: %d\ttotal pass tests rate: %.9f' % (batch_index + 1, all_pass_num/batch_size*(batch_index+1)))
-writer.close()
-sess.close()
+if __name__ == '__main__':
+    import predata as pt
+    data=pt.loadData()
+    data=data[-batch_size:]
+    data = np.array(data)
+    currentX = data[:,0]
+    print(currentX)
+    print(PredictNext(currentX))
