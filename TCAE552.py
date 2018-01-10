@@ -139,11 +139,11 @@ with tf.Session() as sess:
                 _Y = batch_test_y[index][2]
                 Y=Y[-48:]
                 _Y=_Y[-48:]
-                if np.mean(np.fabs(_Y-Y))<240 and util.sharpRatio(Y) * util.sharpRatio(_Y) >0:
+                if np.mean(np.fabs(_Y-Y))<150 and util.sharpRatio(Y) * util.sharpRatio(_Y) >-0.1:
                     all_pass_num+=1
                     current_pass_num+=1
             print('test batch index: %d\tcurrent pass tests rate: %.9f' % (batch_index + 1, current_pass_num/batch_size))
-            print('test batch index: %d\ttotal pass tests rate: %.9f' % (batch_index + 1, all_pass_num/batch_size*(batch_index+1)))
+            print('test batch index: %d\ttotal pass tests rate: %.9f' % (batch_index + 1, all_pass_num/batch_size/(batch_index+1)))
     else:
         model_file=tf.train.latest_checkpoint('./models/')
         saver.restore(sess,model_file)
@@ -163,12 +163,12 @@ with tf.Session() as sess:
                 Y=array[2]  #which hope to be the close data
                 assert len(Y) == INPUT_WIDTH
                 _Y = batch_test_y[index][2]
-                Y=Y[-48:]
-                _Y=_Y[-48:]
-                if np.mean(np.fabs(_Y-Y))<240 and util.sharpRatio(Y) * util.sharpRatio(_Y) >0:
+                Y=Y[-48:]*pdt.GRID_HIGH
+                _Y=_Y[-48:]*pdt.GRID_HIGH
+                if np.mean(np.fabs(_Y-Y))<150 and util.sharpRatio(Y) * util.sharpRatio(_Y) >-0.1:
                     all_pass_num+=1
                     current_pass_num+=1
             print('test batch index: %d\tcurrent pass tests rate: %.9f' % (batch_index + 1, current_pass_num/batch_size))
-            print('test batch index: %d\ttotal pass tests rate: %.9f' % (batch_index + 1, all_pass_num/batch_size*(batch_index+1)))
+            print('test batch index: %d\ttotal pass tests rate: %.9f' % (batch_index + 1, all_pass_num/batch_size/(batch_index+1)))
 writer.close()
 sess.close()

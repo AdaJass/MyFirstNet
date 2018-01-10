@@ -107,5 +107,5 @@ if __name__ == '__main__':
     data=data[-batch_size:]
     data = np.array(data)
     currentX = data[:,0]
-    print(currentX*255)
-    print(PredictNext(currentX)*255)
+    print(currentX*pdt.GRID_HIGH)
+    print(PredictNext(currentX)*pdt.GRID_HIGH)
