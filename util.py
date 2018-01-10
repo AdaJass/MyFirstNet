@@ -1,5 +1,6 @@
 import numpy as np
 
+
 def sharpRatio(data):
     """
     return the weird sharp-ratio

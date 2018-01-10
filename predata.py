@@ -18,6 +18,7 @@ filename = lambda : 'PER_'+str(PERIOD)+'_SAM_'+str(SAMPLE_LENGTH)\
 +'_PRE_'+str(PREDICT_LENGTH)+'_'+RAW_FILE_NAME[2:-4]+'.pickle'
 
 def makeTime(dt):
+    dt = datetime.strptime(dt,'%Y.%m.%d %H:%M')
     w = dt.weekday()    
     w_s = w*24*60/PERIOD
     h = dt.hour
@@ -35,12 +36,11 @@ def pickleRawData():
     print('read and format data:\n')
     for line in tqdm(rawdata):
         cell = line.split(',')
-        time = cell[0]+' '+cell[1]
-        time = datetime.strptime(time,'%Y.%m.%d %H:%M')
+        time = cell[0]+' '+cell[1]        
         highest = float(cell[3])
         lowest = float(cell[4])
         close = float(cell[5])
-        volume = int(cell[6])
+        volume = float(cell[6])
         time = makeTime(time)
         middata.append([highest, lowest, close, volume, time])
 
@@ -54,21 +54,19 @@ def pickleRawData():
         df = DataFrame(d)
         max_v = max(df[0])
         min_v = min(df[1])
-        f_k = lambda x: int(math.floor(GRID_HIGH*(x-min_v)/(max_v-min_v)))
+        f_k = lambda x: (GRID_HIGH*(x-min_v)/(max_v-min_v))
         df['h'] = df[0].apply(f_k)
         df['l'] = df[1].apply(f_k)
         df['c'] = df[2].apply(f_k)
         df['v'] = df[3]
         df['t'] = df[4]
-        
-        df['v'].astype('int')
-        df['t'].astype('int')
+        df['v'].astype('float')
         for i in range(5):
             del df[i]
         # print(df)
         matrix = df.as_matrix()
         matrix = matrix.transpose()
-        matrix = matrix/1440
+        matrix = matrix/GRID_HIGH
         # print(matrix)
         # exit()
         lastdata.append(matrix)

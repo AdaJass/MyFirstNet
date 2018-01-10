@@ -9,9 +9,11 @@ train_epochs = 20  ## int(1e5+1)
   
 INPUT_HEIGHT = 5   
 INPUT_WIDTH = 552
-batch_size = 360
+batch_size = 1
 
-# The default path for saving event files is the same folder of this python file.
+# The default pa
+# 
+# th for saving event files is the same folder of this python file.
 tf.app.flags.DEFINE_string('log_dir', 
     os.path.dirname(os.path.abspath(__file__)) + '/logs',
     'Directory where event logs are written to.')
@@ -91,6 +93,51 @@ learning_rate = tf.train.exponential_decay(0.01,current_iter,
                                         decay_steps = train_epochs,
                                         decay_rate=0.001)
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)  
+
+
+def tidyInput(indt=0):
+    """
+    input:
+        dict of high low close volume  time
+    output:
+        the input data to the network.
+    """    
+    if not indt and len(indt['close'])<INPUT_WIDTH:
+        print('net work input data invalid.')
+        return
+
+    data=pdt.DataFrame()
+    data['h'] = indt['high'][-INPUT_WIDTH:]
+    data['l'] = indt['low'][-INPUT_WIDTH:]
+    data['c'] = indt['close'][-INPUT_WIDTH:]
+    data['v'] = indt['volume'][-INPUT_WIDTH:]
+    data['t'] = indt['time'][-INPUT_WIDTH:]
+    max_v = max(data['h'])
+    min_v = min(data['l'])
+    f_k = lambda x: (pdt.GRID_HIGH*(x-min_v)/(max_v-min_v))
+    data['h'] = data['h'].apply(f_k)
+    data['l'] = data['l'].apply(f_k)
+    data['c'] = data['c'].apply(f_k)
+    data['t'] = data['t'].apply(pdt.makeTime)
+    data['v'].astype('float')
+    matrix = data.as_matrix()
+    matrix = matrix.transpose()
+    matrix = matrix/pdt.GRID_HIGH
+    return [matrix], min_v, max_v
+    pass
+
+def tidyOutput(odt, min_v, max_v):
+    odt = odt * pdt.GRID_HIGH
+    data = odt[0]
+    data = np.array(data)
+    data = data.transpose()
+    data = pdt.DataFrame(data)
+    mid_v = (max_v - min_v)/pdt.GRID_HIGH
+    f_k = lambda x: mid_v *x + min_v
+    data[0] = data[0].apply(f_k)
+    data[1] = data[1].apply(f_k)
+    data[2] = data[2].apply(f_k)
+    return df
 
 def PredictNext(currentX):
     sess = tf.Session()
