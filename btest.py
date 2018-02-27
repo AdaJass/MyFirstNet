@@ -1,20 +1,44 @@
 import datetime
 import backtrader as bt
 import backtrader.feeds as btf
+import STGC as PRD
+import numpy as np
+import math
 
 
 # Create a Stratey
-class TestStrategy(bt.Strategy):
+class TestStrategy(bt.Strategy): 
 
-    def log(self, txt, dt=None):
-        ''' Logging function fot this strategy'''
-        dt = dt or self.datas[0].datetime.datetime()
-        print('%s, %s' % (dt, txt))
+    @staticmethod   
+    def makeTime(dt):
+        w = dt.weekday()    
+        w_s = w*24*60/PRD.PERIOD
+        h = dt.hour
+        h_s = h*60/PRD.PERIOD
+        m = dt.minute
+        m_s = math.ceil(m/PRD.PERIOD)
+        return int(w_s + h_s + m_s) 
+
+    def prepare(self):
+        #make data
+        self.dataclose.append(self.data.close[0])
+        self.datavolume.append(self.data.volume[0])
+        self.datahigh.append(self.data.high[0])
+        self.datalow.append(self.data.low[0])
+        self.datatime.append(TestStrategy.makeTime(self.data.datetime.datetime()))
+
+        # print(dir(self.datatime.datetime()))
+        # dt = dt or self.datas[0].datetime.datetime()
+        # print('%s, %s' % (dt, txt))
 
     def __init__(self):
-        # Keep a reference to the "close" line in the data[0] dataseries
-        self.dataclose = self.datas[0].close
-
+        # Keep a reference to the "close" line in the datas[0] dataseries
+        self.dataclose = [] 
+        self.datahigh = []
+        self.datalow = []
+        self.datavolume = []
+        self.datatime = []
+        
         # To keep track of pending orders
         self.order = None
     
@@ -40,13 +64,29 @@ class TestStrategy(bt.Strategy):
         self.order = None
     
     def next(self):
-        # Simply log the closing price of the series from the reference
-        self.log('Close, %.2f' % self.dataclose[0])
 
-        # Check if an order is pending ... if yes, we cannot send a 2nd one
-        if self.order:
+        self.prepare()
+
+        if len(self.dataclose) < PRD.INPUT_WIDTH:
             return
+        highest = self.datahigh[-PRD.INPUT_WIDTH:]
+        lowest = self.datalow[-PRD.INPUT_WIDTH:]
+        closed = self.dataclose[-PRD.INPUT_WIDTH:]
+        volumed = self.datavolume[-PRD.INPUT_WIDTH:]
+        timed = self.datatime[-PRD.INPUT_WIDTH:]
+        midX = [highest, lowest, closed, volumed, timed]
+        midX = np.array(midX)
+        max_v = max(midX[0])
+        min_v = min(midX[1])
+        f_k = lambda x: int(math.floor(PRD.GRID_HIGH*(x-min_v)/(max_v-min_v)))
+        for ii in range(3):
+            for i,v in enumerate(midX[ii]):
+                midX[ii][i] = f_k(v)
 
+        midX = midX / PRD.GRID_HIGH    
+        midX = midX.reshape((1, PRD.INPUT_HEIGHT, PRD.INPUT_WIDTH))
+        print(midX)
+        print(PRD.PredictNext(midX))
         # Check if we are in the market
         if not self.position:
             # Not yet ... we MIGHT BUY if ...
@@ -89,7 +129,7 @@ if __name__ == '__main__':
         open=1,
         high=2,
         timeframe = bt.TimeFrame.Minutes,
-        compression=5,
+        compression=1,
         fromdate=datetime.datetime(2017, 6, 1),
         todate=datetime.datetime(2017, 6, 20),
         low=3,        
