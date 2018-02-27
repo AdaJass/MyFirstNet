@@ -21,6 +21,7 @@ class TestStrategy(bt.Strategy):
 
     def prepare(self):
         #make data
+        print(self.data.datetime.datetime())
         self.dataclose.append(self.data.close[0])
         self.datavolume.append(self.data.volume[0])
         self.datahigh.append(self.data.high[0])
@@ -122,19 +123,21 @@ if __name__ == '__main__':
 
     # Create a Data Feed
     data = bt.feeds.GenericCSVData(
-        dataname='./XTIUSD.csv',
-        dtformat = ('%Y.%m.%d %H:%M'),
+        dataname='./XTIUSD5.csv',
+        dtformat = ('%Y.%m.%d'),
+        tmformat = ('%H:%M'),
         nullvalue=0.0,
         datetime=0,
-        open=1,
-        high=2,
+        time = 1,
+        open=2,
+        high=3,
         timeframe = bt.TimeFrame.Minutes,
         compression=1,
         fromdate=datetime.datetime(2017, 6, 1),
         todate=datetime.datetime(2017, 6, 20),
-        low=3,        
-        close=4,
-        volume=5,
+        low=4,        
+        close=5,
+        volume=6,
         openinterest=-1
     )
 
