@@ -9,7 +9,7 @@ PERIOD = 5  # time period is 5 minutes, it will process 5 minite period data.
 INPUT_HEIGHT = 5   
 INPUT_WIDTH = 1440
 GRID_HIGH = 1000    #it means that all price data will in the interval of [0,1000]
-batch_size = 3
+batch_size = 360
 
 ## 原始输入是5*1440*1
 input_x = tf.placeholder(tf.float32, [None, INPUT_HEIGHT , INPUT_WIDTH], name='input_x')  

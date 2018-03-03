@@ -85,7 +85,7 @@ class TestStrategy(bt.Strategy):
                 midX[ii][i] = f_k(v)
 
         midX = midX / PRD.GRID_HIGH    
-        midX = midX.reshape((1, PRD.INPUT_HEIGHT, PRD.INPUT_WIDTH))
+        midX = midX.reshape(1, PRD.INPUT_HEIGHT, PRD.INPUT_WIDTH)
         print(midX)
         print(PRD.PredictNext(midX))
         # Check if we are in the market
@@ -133,8 +133,8 @@ if __name__ == '__main__':
         high=3,
         timeframe = bt.TimeFrame.Minutes,
         compression=1,
-        fromdate=datetime.datetime(2017, 6, 1),
-        todate=datetime.datetime(2017, 6, 20),
+        fromdate=datetime.datetime(2017, 5, 3),
+        todate=datetime.datetime(2017, 11, 17),
         low=4,        
         close=5,
         volume=6,

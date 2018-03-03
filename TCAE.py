@@ -9,7 +9,7 @@ train_epochs = 20  ## int(1e5+1)
   
 INPUT_HEIGHT = 5   
 INPUT_WIDTH = 1440
-batch_size = 360
+batch_size = 36
 
 # The default path for saving event files is the same folder of this python file.
 tf.app.flags.DEFINE_string('log_dir', 
@@ -115,11 +115,12 @@ with tf.Session() as sess:
                 batch_data = np.array(batch_data)
                 batch_x = batch_data[:,0]
                 batch_y = batch_data[:,1]
-                _, train_loss = sess.run([optimizer, loss], feed_dict={input_x: batch_x, input_y: batch_y})  
+                _,output_y, train_loss = sess.run([optimizer, output, loss], feed_dict={input_x: batch_x, input_y: batch_y})  
                 print('epoch: %04d\tbatch: %04d\ttrain loss: %.9f' % (epoch + 1, batch_index + 1, train_loss))  
 
             saver_path = saver.save(sess, "./models/MyFirstNet-Model",global_step=epoch)  # 将模型保存到save/model.ckpt文件
             print("Model saved in file:", saver_path)
+            print(batch_y, '\n',output_y)
 
         n_test_samples = len(test_data) 
         test_total_batch = int(n_test_samples / batch_size) 
