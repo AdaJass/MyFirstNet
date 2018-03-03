@@ -1,7 +1,7 @@
 import datetime
 import backtrader as bt
 import backtrader.feeds as btf
-import STGC as PRD
+import STGC552 as PRD
 import numpy as np
 import math
 

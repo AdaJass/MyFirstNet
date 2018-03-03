@@ -92,7 +92,7 @@ learning_rate = tf.train.exponential_decay(0.01,current_iter,
                                         decay_rate=0.001)
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(loss)  
 
-isTrain = False
+isTrain = True
 
 with tf.Session() as sess: 
     all_data = pdt.loadData()
@@ -101,7 +101,7 @@ with tf.Session() as sess:
     test_data = all_data[train_test_pivot:]    
     n_samples = len(train_data) 
     if isTrain: 
-        writer = tf.summary.FileWriter(os.path.abspath(os.path.expanduser('./testlogs')), sess.graph) 
+        writer = tf.summary.FileWriter(os.path.abspath(os.path.expanduser('./testlogs552')), sess.graph) 
         print('train samples: %d' % n_samples)  
         print('batch size: %d' % batch_size)  
         total_batch = int(n_samples / batch_size)  
@@ -118,7 +118,7 @@ with tf.Session() as sess:
                 _, train_loss = sess.run([optimizer, loss], feed_dict={input_x: batch_x, input_y: batch_y})  
                 print('epoch: %04d\tbatch: %04d\ttrain loss: %.9f' % (epoch + 1, batch_index + 1, train_loss))  
 
-            saver_path = saver.save(sess, "./models/MyFirstNet-Model",global_step=epoch)  # 将模型保存到save/model.ckpt文件
+            saver_path = saver.save(sess, "./models552/MyFirstNet-Model",global_step=epoch)  # 将模型保存到save/model.ckpt文件
             print("Model saved in file:", saver_path)
 
         n_test_samples = len(test_data) 
@@ -145,7 +145,7 @@ with tf.Session() as sess:
             print('test batch index: %d\tcurrent pass tests rate: %.9f' % (batch_index + 1, current_pass_num/batch_size))
             print('test batch index: %d\ttotal pass tests rate: %.9f' % (batch_index + 1, all_pass_num/batch_size/(batch_index+1)))
     else:
-        model_file=tf.train.latest_checkpoint('./models/')
+        model_file=tf.train.latest_checkpoint('./models552/')
         saver.restore(sess,model_file)
         n_test_samples = len(test_data) 
         test_total_batch = int(n_test_samples / batch_size) 

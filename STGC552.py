@@ -1,4 +1,4 @@
-  
+
 import tensorflow as tf  
 import util
 import numpy as np  
@@ -6,7 +6,8 @@ import predata as pdt
 import os 
   
 train_epochs = 20  ## int(1e5+1)  
-  
+GRID_HIGH = pdt.GRID_HIGH
+PERIOD = pdt.PERIOD 
 INPUT_HEIGHT = 5   
 INPUT_WIDTH = 552
 batch_size = 1
@@ -141,7 +142,8 @@ def tidyOutput(odt, min_v, max_v):
 
 def PredictNext(currentX):
     sess = tf.Session()
-    model_file=tf.train.latest_checkpoint('./models/')
+    print('i have been here!!')
+    model_file=tf.train.latest_checkpoint('./models552/')
     saver.restore(sess,model_file)
     output_result = sess.run(output, feed_dict={input_x: currentX})  
     sess.close()
